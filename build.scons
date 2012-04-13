@@ -1,0 +1,27 @@
+#! -*- python -*-
+#
+# Copyright (c) 2012 Leon Pajk. All rights reserved.
+# Use of this source code is governed by a GPL-style license that can be
+# found in the LICENSE file.
+
+import make_nacl_env
+import os
+from build_config import *
+
+nacl_env = make_nacl_env.NaClEnvironment(
+    use_c_plus_plus_libs=True, nacl_platform=os.getenv('NACL_TARGET_PLATFORM'))
+
+try:
+    sources.remove('ots.c')
+finally:
+    libots_sources = [(source_base_dir + os.sep + el) for el in sources]
+sources = libots_sources + ['ots.cc', 'ots_module.cc']
+nacl_env['PPAPI_BROWSER_DEBUG'] = 1
+nacl_env['NACL_PLUGIN_DEBUG'] = 1
+nacl_env['NACL_PPAPI_PROXY_DEBUG'] = 1
+nacl_env['NACL_SRPC_DEBUG'] = 1
+nacl_env['NACLVERBOSITY'] = 2
+nacl_env.Append(CPPPATH=['#/include'])
+nacl_env.Append(LIBS=['libglib-2.0', 'libroxml', 'libots', 'libnosys', 'libpthread'])
+#nacl_env.Append(LINKFLAGS='-Wl,--trace')
+nacl_env.AllNaClModules(sources, 'ots_nacl')

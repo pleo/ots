@@ -1,0 +1,1400 @@
+<!DOCTYPE html>
+<!--
+ o88888.     .o8    .o8888b. 
+888   88b  .o888oo  "88.  88 
+888   888    888     goo.    
+888   888    888      goo.   
+888   888    888       `88b  
+888   888    888 .  88   888 
+`Y8leonP'    "888"  `YpajkP' 
+-->
+<html>
+<head>
+<meta charset="utf-8">
+  <title>Open text summarizer</title>
+  <script type="text/javascript" src="js/jquery-1.7.1.min.js"></script>
+  <style>
+  ::-webkit-scrollbar {
+    height: 16px;
+    overflow: visible;
+    width: 16px;
+  }
+  
+  ::-webkit-scrollbar-button {
+    height: 0;
+    width: 0;
+  }
+  
+  ::-webkit-scrollbar-track:vertical {
+    background-clip: padding-box;
+    border: solid transparent;
+    border-width: 0 0 0 4px;
+  }
+  
+  ::-webkit-scrollbar-track:horizontal {
+    background-clip: padding-box;
+    border: solid transparent;
+    border-width: 4px 0 0 0;
+  }
+  
+  ::-webkit-scrollbar-track-piece:vertical {
+    background-clip: padding-box;
+    background-color: #f5f5f5;
+    border: solid #fff;
+    border-width: 0 0 0 6px;
+    box-shadow: inset 1px 0 0 rgba(0,0,0,.14), inset -1px 0 0 rgba(0,0,0,.07);
+  }
+  
+  ::-webkit-scrollbar-track-piece:horizontal {
+    background-clip: padding-box;
+    background-color: #f5f5f5;
+    border: solid #fff;
+    border-width: 6px 0 0 0;
+    box-shadow: inset 0 1px 0 rgba(0,0,0,.14), inset 0 -1px 0 rgba(0,0,0,.07);
+  }
+  
+  ::-webkit-scrollbar-thumb:vertical {
+    background-color: rgba(0,0,0,.2);
+    background-clip: padding-box;
+    border: solid transparent;
+    min-height: 28px;
+    padding: 100px 0 0;
+    box-shadow: inset 1px 1px 0 rgba(0,0,0,.1), inset 0 -1px 0 rgba(0,0,0,.07);
+    border-width: 1px 1px 1px 7px;
+  }
+  
+  ::-webkit-scrollbar-thumb:horizontal {
+    background-color: rgba(0,0,0,.2);
+    background-clip: padding-box;
+    border: solid transparent;
+    min-width: 28px;
+    padding: 100px 0 0;
+    box-shadow: inset 1px 1px 0 rgba(0,0,0,.1), inset 0 -1px 0 rgba(0,0,0,.07);
+    border-width: 7px 1px 1px 1px;
+  }
+  
+  ::-webkit-scrollbar-thumb:active {
+    background-color: rgba(0,0,0,.4) !important;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(0,0,0,.3);
+  }
+  
+  ::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+  
+  ::-webkit-resizer {
+    background: transparent;
+  }
+  
+  ::selection {
+    background: #333;
+    color: white;
+    }
+  
+  header {
+    position: absolute;
+    width: 194px;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    -webkit-user-select: none;
+  }
+  
+  header h1 {
+    font-family: 'Museo', sans-serif;
+    padding-left: 0px;
+    color: #0099ff;
+    font-size: 16px;
+    margin-left: 0;
+    -webkit-padding-start: 18px;
+  }
+  
+  body {
+    cursor: default;
+    font-family: 'Open Sans', sans-serif;
+    font-size: 16px;
+    font-weight: lighter;
+    margin: 0;
+    min-height: 250px;
+  }
+  
+  h1 {
+    -webkit-user-select: none;
+    -webkit-margin-before: 18px;
+    -webkit-margin-start: 23px;
+    color: #303942;
+    font-size: 18px;
+    font-weight: normal;
+    margin-top: 1em;
+  }
+  
+  a {
+    text-decoration: none;
+  }
+  
+  ol {
+    list-style-type: none;
+    padding: 0;
+  }
+  
+  li, a {
+    -webkit-border-start: 6px solid white;
+    -webkit-padding-start: 3px;
+    color: #999;
+    cursor: pointer !important;
+    line-height: 17px;
+    margin: 5px 0;
+    text-transform: uppercase;
+  }
+  
+  li:hover, a:hover {
+    color: #777;
+  }
+  
+  li.selected {
+    -webkit-border-start-color: #4E5764;
+    color: #464E5A;
+    font-weight: bold;
+  }
+  
+  p {
+    line-height: 22px;
+  }
+  
+  article {
+    background: #fff;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 194px;
+    right: 2px;
+    padding: 0 24px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    z-index: 999;
+  }
+  
+  .page h1 {
+    -webkit-padding-end: 24px;
+    -webkit-user-select: none;
+    border-bottom: 1px solid #EEE;
+    color: #333;
+    font-size: 2em;
+    font-weight: normal;
+    margin: 0;
+    padding-bottom: 4px;
+    padding-top: 13px;
+    text-shadow: white 0 1px 2px;
+  }
+  
+  .page h1:target {
+    content: "target";
+  }
+  
+  .page a {
+    color: #41B7D8;
+    text-decoration: none;
+  }
+  
+  .page a:active {
+    background-color: #e53b2c;
+    color: white;
+  }
+  
+  .page ::-webkit-scrollbar-button:vertical:start {
+    width: 18px;
+    height: 27px;
+    border: solid white;
+    background-image: -webkit-gradient(linear,left top,left bottom,from(#f4baba),to(#db7f7f));
+    border-width: 0 0 0px 6px;
+  }
+  
+  .page ::-webkit-scrollbar {
+    height: 24px;
+    width: 24px;
+  }
+  
+  .page textarea {
+    font-family: arial;
+    font-size: 16px;
+    font-style: normal;
+    font-variant: normal;
+    font-weight: normal;
+    line-height: normal;
+    width: 600px;
+    height: 400px;
+    min-height: 200px;
+    padding-left: 3px;
+    padding-top: 2px;
+    padding-bottom: 1px;
+    padding-right: 20px;
+    border: 1px solid #D9D9D9;
+    border-top: 1px solid silver;
+    resize: none;
+  }
+  
+  .page textarea:focus {
+    border-color: #2DBC24;
+    border-top-color: #2DBC24;
+    border-right-color: #2DBC24;
+    border-bottom-color: #2DBC24;
+    border-left-color: #2DBC24;
+    box-shadow: #6ce164 0 0 5px;
+  }
+  
+  .page input {
+    font-family: Tahoma,Arial,Verdana,sans-serif;
+    font-size: 11px;
+  }
+  
+  .page label {
+    font-size: 95%;
+    font-weight: bold;
+    color: #222;
+    line-height: 150%;
+    margin: 0;
+    padding: 0 0 3px 0;
+    border: none;
+    display: block;
+    white-space: normal;
+    width: 100%;
+  }
+  
+  section {
+    opacity: 0;
+    z-index: 7;
+    display: none;
+  }
+  
+  section:target {
+    display: block;
+    opacity: 1;
+    z-index: 7;
+    top: 0;
+  }
+  
+  .page-button-img {
+    width: 21px;
+    height: 21px;
+    display: inline-block;
+  }
+  
+  .page-clear-button {
+    color: #15C;
+    cursor: pointer;
+  }
+  
+  .page-clear-button .page-button-img {
+    width: 17px;
+    height: 17px;
+    margin-top: -9px;
+    background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABEAAAARCAYAAAA7bUf6AAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A/wD/oL2nkwAAAE1JREFUOMtjYBjWIIGBgeE9AwODARY5A6hcAiFD3jMwMPzHYpABmhxeYIDFIAM8hhNtEMkGYDOIoAFMtIohir1DlYClShRTJbGNAgYGACQfL5eFfFTiAAAAAElFTkSuQmCC) no-repeat;
+  }
+  
+  .page-layer {
+    position: absolute;
+    color: white;
+    background-color: white;
+    border: 1px solid white;
+  }
+  
+  .page-toolbar-button .page-button-img {
+    opacity: 0.667;
+    margin-top: -3px;
+    vertical-align: middle;
+    margin-right: -3px;
+  }
+  
+  .page-toolbar-button-focused {
+    border: 1px solid #4D90FE;
+  }
+  
+  .page-flat-menu-button {
+    min-width: 0;
+    margin: 0;
+  }
+  
+  .page-flat-menu-button {
+    -webkit-border-radius: 2px;
+    border-radius: 2px;
+    background-color: whiteSmoke;
+    background-image: -webkit-linear-gradient(top,whiteSmoke,#F1F1F1);
+    border: 1px solid gainsboro;
+    color: #444;
+    cursor: default;
+    font-size: 11px;
+    font-weight: bold;
+    line-height: 26px;
+    list-style: none;
+    margin: 0 2px;
+    min-width: 46px;
+    outline: none;
+    padding: 0 18px 0 6px;
+    text-align: center;
+    text-decoration: none;
+    vertical-align: middle;
+  }
+  
+  .page-inline-block {
+    position: relative;
+    display: inline-block;
+  }
+  
+  .page-flat-menu-button-dropdown {
+    border-color: #777 transparent;
+    border-style: solid;
+    border-width: 4px 4px 0 4px;
+    height: 0;
+    width: 0;
+    position: absolute;
+    right: 5px;
+    top: 12px;
+  }
+  
+  .page-flat-menu-button-hover {
+    background-color:#f8f8f8;
+    background-image:-webkit-linear-gradient(top,#f8f8f8,#f1f1f1);
+    background-image:linear-gradient(top,#f8f8f8,#f1f1f1);
+    box-shadow:0 1px 1px rgba(0,0,0,.1);
+    border-color:#c6c6c6;color:#333;
+  }
+  
+  .page-flat-menu-button.page-flat-menu-button-focused {
+    border-color: #f1ca7f;
+  }
+  
+  .page-toolbar-button-hover {
+    box-shadow: 0px 0px 3px 3px #ad3415;
+  }
+  
+  .page-toolbar-button-hover-transparent {
+    box-shadow: 0px 0px 3px 3px transparent !important;
+  }
+  
+  .page-toolbar-button.page-toolbar-button-hover .page-button-img {
+    opacity: 0.9;
+    filter: alpha(opacity=90);
+  }
+  
+  .page-toolbar-button {
+    -webkit-border-radius: 2px;
+    border-radius: 2px;
+    -webkit-user-select: none;
+    background: 0;
+    border-color: transparent;
+    border-style: solid;
+    border-width: 1px;
+    outline: none;
+    padding: 0;
+    height: 25px;
+    color: #444;
+    line-height: 25px;
+    list-style: none;
+    font-size: 11px;
+    font-weight: bold;
+    text-decoration: none;
+    vertical-align: middle;
+    cursor: default;
+  }
+  
+  #page-submit-button {
+    float: left;
+  }
+  
+  .page-tooltip:after {
+    display: none;
+    margin-bottom: 7px;
+    bottom: 20px;
+    left: -30px;
+    padding: 7px 9px;
+    pointer-events: none;
+    width: auto;
+    line-height: 1em;
+    font-size: 11px;
+    font-weight: bold;
+    text-align: center;
+    border: 1px solid white;
+    color: white;
+    background-color: #2A2A2A;
+    opacity: 1;
+    overflow: visible;
+    word-wrap: normal;
+    white-space: nowrap;
+    position: absolute;
+    content: attr(data-tooltip);
+    z-index:999;
+  }
+  
+  .page-tooltip:hover:after {
+    display: block;
+    z-index: 1000;
+  }
+  
+  #input_text, .page-layer, #output_text, .page-layer {
+    font-family: arial,sans-serif;
+    font-size: 16px;
+    width: 100%;
+    margin: 0;
+    outline: none;
+  }
+  
+  p {
+    display: block;
+    -webkit-margin-before: 1em;
+    -webkit-margin-after: 1em;
+    -webkit-margin-start: 0px;
+    -webkit-margin-end: 0px;
+  }
+  
+  p {
+    line-height: 1.4em;
+    margin: 1em 0;
+  }
+  
+  input[type="submit"] {
+    line-height: 1.72em;
+  }
+  
+  input.button-chrome[type="submit"]:hover, a.button-chrome:hover {
+    border-color: #999 #999 #666;
+    background-color: #DBDBDB;
+    background-position: 0 -80px;
+  }
+  
+  input.button-chrome[type="submit"], a.button-chrome {
+    padding: .2em .8em;
+    background: #e1e1e1 url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAADICAYAAADV56A/AAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A/wD/oL2nkwAAAqlJREFUWMPtmM2O5DgMgz8afv+H7KfokzkHSbacauzsYG67KTQaKIfRD0XHTGmtZf7hM/jNZ2AAYww4/nINYDoXtZfyf4ImBsu1jgWy4osygld8qVt31YZpGxA2KCOdVIoIStAySABrdzHvO4yXTrooMnPuNk7B2SbY1equNDFi2gujqF5EPVIGM9MrWFSmsB0kyWBFCoC1YlEAXtgCrYjQUmd2RavWmQX7QoBkMoI7b67LGU4FOJd3m1nojhDDeKhl0QCH7Qt4AzZQTVE/AVo1F0D9kkowmwftERVPoYfl3WSX2o6wsj37kcIlWm/ecMtQ1Ez3K43NGsB0Sk6qIYVwSkSztp2tU/wKAbmKVG2YRnHxE6reevtx+xuvRanbfbdXFzH63KB7b5pl37PYXPpj3MJyKX3PRnI9giK3r0KdTGaLaiPeG0/ZJm3f9gLsf/GU08+S+6Pn5At4AS/gBfyXAfP7+/v1k6+f/J/5yfHzfefLHreegNdPvn7yPVBewAt4AS/gw09+fX39pZ+U+mEr1I2YxCQXb3dwLFdGOP5R+wblqfdYQFGYc23WwREHWuFMObsxNEAZpYrRQPvE0XGBV6ox4uzWs4V2Krm36bSJ2gWagZiVe2x3pugiT/pMIYSwivu0BxFBHw6tUmGYGqL/2tZOZgRMberuEZdtOW2O24Yp3wgCoOObjpe6urgtYi+6Mflh1p6Aerl4AmiLevx4SOdBDydY7xfRRVhlNXes0wXgwaWLFnJKIz19I6PyORWFRzK3X7tSgjDEQOPocEiMcWrNInXeL0IIaETRSVT5qNEkB9LILh70qaJ8Up2vLo3dnaKkVtYVwqHOPghhNErRu0g+BlGGV6pZXK+SR5hy7u6z89Xra5psvjomWxOvCNdjSFeE3z7lfgH7i6Ygzv84lwAAAABJRU5ErkJggg==) repeat-x 0 0;
+    border: 1px solid #BBB;
+    border-bottom-color: #999;
+    cursor: pointer;
+    font-weight: 400;
+    font-size: 1em;
+    text-shadow: none;
+  }
+  
+  input[type="submit"], span, .button, .button-chrome {
+    -webkit-border-radius: .25em;
+    border-radius: .25em;
+  }
+  
+  #page-home-bar, #page-edit-bar {
+    padding-bottom: 0;
+    margin-bottom: 0;
+    padding-top: 0;
+    margin-top: 0;
+    padding: 5px 5px 5px 0px;
+  }
+  
+  #page-home-bar, #page-edit-bar {
+    position: relative;
+    height: 29px;
+    z-index: 20;
+    padding: 7px 16px 7px 0px;
+    background: white;
+  }
+  
+  #page-home-bar #page-appname, #page-edit-bar #page-appname {
+    padding: 0;
+    margin: 0 18px 0 0;
+    height: 29px !important;
+    float: left;
+    font-weight: normal;
+    font-size: 16px;
+    line-height: 29px;
+    color: #DD4B39;
+    white-space: nowrap;
+    text-decoration: none;
+  }
+  
+  #page-langs {
+    margin-bottom: 10px;
+  }
+  #page-langs {
+    vertical-align: middle;
+  }
+  #page-lang-src {
+    float: left;
+  }
+  
+  .page-menu {
+    font-size: 12px;
+    white-space: nowrap;
+    padding: 4px;
+    z-index: 20000;
+  }
+  
+  .page-menu {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    -webkit-transition: opacity 0.218s;
+    transition: opacity 0.218s;
+    background: white;
+    border: 1px solid #CCC;
+    border: 1px solid rgba(0, 0, 0, .2);
+    cursor: default;
+    font-size: 13px;
+    margin: 0;
+    outline: none;
+    padding: 6px 0;
+    position: absolute;
+  }
+  
+  #page-menu .page-menuitem-group {
+    float: left;
+  }
+  
+  #page-lang-menu .page-menuitem, #page-lang-menu .page-menuitem {
+    padding: 3px 3px 3px 3px;
+    margin-right: 15px;
+    border-style: none;
+  }
+  
+  .page-menuitem-group .page-menuitem {
+    border: 1px solid transparent !important;
+  }
+  
+  .page-menuitem-group .page-option {
+    padding-left: 3px !important;
+  }
+  
+  .page-menuitem-highlight, .page-menuitem-hover {
+    background-color: #EEE;
+    border-color: #EEE;
+    border-style: dotted;
+    border-width: 1px;
+    padding-top: 5px;
+    padding-bottom: 5px
+  }
+  
+  .page-menuitem-group .page-menuitem-highlight {
+    border: 1px solid #4D90FE !important;
+  }
+  
+  .page-menuitem-group .page-option-selected {
+    background-color: #EEE;
+    background-image: none;
+    font-weight: bold;
+  }
+  
+  .page-option-selected {
+    background-repeat: no-repeat;
+    background-position: left center;
+  }
+  
+  .page-menuitem, .page-tristatemenuitem, .page-filterobsmenuitem {
+    position: relative;
+    color: #333;
+    cursor: pointer;
+    list-style: none;
+    margin: 0;
+    padding: 6px 7em 6px 30px;
+    white-space: nowrap;
+  }
+  
+  .page-option-selected .page-menuitem-content, .page-option-selected .page-menuitem-content {
+    color: #333;
+  }
+  
+  .page-menuitem-group .page-option-selected {
+    font-weight: bold;
+  }
+  
+  .page-menuitem, .page-tristatemenuitem, .page-filterobsmenuitem {
+    color: #333;
+    cursor: pointer;
+    list-style: none;
+    white-space: nowrap;
+  }
+  
+  .page-menuitem-group .page-option-selected .page-menuitem-checkbox {
+    background-image: none;
+  }
+  
+  .page-menuitem-group .page-menuitem-checkbox {
+    display: none;
+  }
+  
+  .page-menuitem-checkbox, .page-menuitem-icon {
+    background-repeat: no-repeat;
+    height: 21px;
+    left: 3px;
+    position: absolute;
+    right: auto;
+    top: 3px;
+    vertical-align: middle;
+    width: 21px;
+  }
+  
+  .page-menuseparator {
+    margin: 2px 0;
+    margin-right: 8px;
+  }
+  
+  .page-menuseparator {
+    border-top: 1px solid #EBEBEB;
+  }
+  
+  .page-footer {
+    clear: both;
+    bottom: 0;
+    position: absolute;
+    margin-top: 3em;
+    vertical-align: baseline;
+    width: 100%;
+    z-index: 999;
+    font-family: serif;
+    text-align: center;
+  }
+  .page-footer-span, .page-footer-span div {
+    display: inline-block;
+  }
+  
+  .page-footer-span div {
+    margin-right: 1.6em;
+  }
+  
+  .page-footer-span a {
+    color: #08C;
+    text-decoration: none;
+    text-transform: none;
+    -webkit-border-start: none;
+  }
+  .over {
+    border: 2px dashed #000;
+  }
+  </style>
+  
+  <script type="text/javascript">
+    OtsNaclModule = null;
+    
+    function onInitFs(fs) {
+      console.log('Opened file system: ' + fs.name);
+      
+      fs.root.getFile('/en.xml', {create: true}, function(fileEntry) {
+        // filesystem:http://example.com/persistent/myfile
+        
+        // Get a File object representing the file,
+        // then use FileReader to read its contents.
+        fileEntry.file(function(file) {
+           var reader = new FileReader();
+
+           reader.onloadend = function(e) {
+             $('#dictionary_text').text(this.result);
+             
+             if (this.result.length > 0) {
+              $('#dictionary_text_box .page-clear-button').show();
+             }
+             //console.log(this.result);
+           };
+
+           reader.readAsText(file);
+        }, errorHandlerFs);
+        
+      }, errorHandlerFs);
+    }
+    
+    function errorHandlerFs(e) {
+      var msg = '';
+      
+      switch (e.code) {
+        case FileError.QUOTA_EXCEEDED_ERR:
+          msg = 'QUOTA_EXCEEDED_ERR';
+          break;
+        case FileError.NOT_FOUND_ERR:
+          msg = 'NOT_FOUND_ERR';
+          break;
+        case FileError.SECURITY_ERR:
+          msg = 'SECURITY_ERR';
+          break;
+        case FileError.INVALID_MODIFICATION_ERR:
+          msg = 'INVALID_MODIFICATION_ERR';
+          break;
+        case FileError.INVALID_STATE_ERR:
+          msg = 'INVALID_STATE_ERR';
+          break;
+        default:
+          msg = 'Unknown Error';
+          break;
+      };
+      console.log('Error: ' + msg);
+    }
+    
+    // Indicate load success.
+    function moduleDidLoad() {
+      window.requestFileSystem = window.requestFileSystem || window.webkitRequestFileSystem;
+      if (window.requestFileSystem) {
+        window.webkitStorageInfo.requestQuota(PERSISTENT, 4*1024*1024, // 4MB
+          function(grantedBytes) {
+            window.requestFileSystem(PERSISTENT, grantedBytes, onInitFs, errorHandlerFs);
+        },  errorHandlerFs);
+      }
+      
+      OtsNaclModule = document.getElementById('ots_nacl');
+      OtsNaclModule.addEventListener('message', handleMessage, false);
+      loadTextFile();
+      
+      $('.page-clear-button').hover(function() {
+        $(this).addClass('page-toolbar-button-hover');
+      }, function() {
+        $(this).removeClass('page-toolbar-button-hover');
+      });
+      $('#dictionay_text-clear-button').addClass('page-toolbar-button-hover-transparent');
+    }
+    
+    function loadTextFile() {
+      $(document).ready(function(){
+        $("#input_text").load('articles/linus1.txt');
+      })
+    }
+    
+    // The 'message' event handler.  This handler is fired when the NaCl module
+    // posts a message to the browser by calling PPB_Messaging.PostMessage()
+    // (in C) or pp::Instance.PostMessage() (in C++).  This implementation
+    // simply displays the content of the message in an alert panel.
+    function handleMessage(message_event) {
+      $("#output_text").val(message_event.data);
+    }
+    
+    // If the page loads before the Native Client module loads, then set the
+    // status message indicating that the module is still loading.  Otherwise,
+    // do not change the status message.
+    function pageDidLoad() {
+      var headerNavigationItems = $('header nav li');
+      
+      /* When anchor name doesn't match with 'href' in navigation menu, set it to home */
+      var locationHashIndex = jQuery.inArray(window.location.hash,
+        headerNavigationItems.children().map(function(){
+          return $(this).attr('href');
+      }));
+      
+      if(-1 === locationHashIndex) {
+        window.location.hash = 'home';
+      }
+      
+      /* Click event handler for capitalize title and
+         highlight selected item in navigation menu. */
+      for (var i = 0; i < headerNavigationItems.length; ++i) {
+        headerNavigationItems[i].addEventListener('click', function(e) {
+          var lastSelectedNavItem = $(headerNavigationItems + '[class=selected]');
+          if (lastSelectedNavItem !== e.currentTarget) {
+            if (lastSelectedNavItem) {
+              lastSelectedNavItem.removeClass();
+            }
+            e.currentTarget.classList.add('selected');
+            var anchorName = e.target.href;
+            
+            if(!anchorName) {
+              anchorName = $(this).children().attr('href');
+            }
+            
+            var locationHashName = anchorName.split(String.fromCharCode(35))[1];
+            
+            if(locationHashName) {
+              window.location.href = anchorName;
+            }
+          }
+          return false;
+        });
+      }
+      
+      /* Highlight selected anchor name. */
+      $(headerNavigationItems + '[class=selected]').removeClass();
+      $('header').find('nav li a[href='+ window.location.hash +']').parent().addClass('selected');
+    }
+  </script>
+</head>
+<body onload="pageDidLoad()">
+<noscript>
+<style>
+header, article {display: none}
+p {color: #09f; font-size: 28px; font-family: sans-serif}
+</style>
+<p>JavaScript must be enabled in order for you to use Open text summarizer.</p>
+</noscript>
+<div id="nacl-listener">
+  <script type="text/javascript">
+    var listener = document.getElementById('nacl-listener');
+    listener.addEventListener('load', moduleDidLoad, true);
+    listener.addEventListener('message', handleMessage, true);
+  </script>
+  <embed name="nacl_module" id="ots_nacl" width=0 height=0 src="ots_nacl.nmf" type="application/x-nacl" />
+</div>
+<header>
+  <h1>Open Text Summarizer</h1>
+  <nav>
+  <ol>
+    <li class="selected"><a href="#home">Home</a></li>
+    <li><a href="#settings">Settings</a></li>
+    <li><a href="#about">About</a></li>
+  </ol>
+  </nav>
+</header>
+<article id="page-container" class="page">
+  <section id="home">
+  <h1>Home</h1>
+    <div>
+      <div id="page-home-bar" style="width: 100%; position: relative; overflow: hidden; font: normal 13px arial,sans-serif;">
+        <span id="page-appname">Summarize text</span>
+        <div id="page-langs">
+          <div id="page-lang-src">
+            <input type="hidden" id="page-sl" name="en" value="en">
+            <div id="page-sl-gms" class="page-inline-block page-flat-menu-button"
+                aria-expanded="false" role="listbox" style="-webkit-user-select: none; "
+                tabindex="0" aria-haspopup="false" aria-activedescendant="">
+              <div class="page-inline-block page-flat-menu-button-caption"
+                   style="overflow-x: hidden; overflow-y: hidden; ">From: English</div>
+              <div class="page-inline-block page-flat-menu-button-dropdown"></div>
+            </div>
+          </div>
+          
+          <div id="page-submit-button">
+            <input type="submit" id="page-submit" value="Summarize" tabindex="0" class="button-chrome" style="margin: 0 0 0 18px;">
+          </div>
+        </div>
+      </div>
+      
+      <div style="width: 95%; position: absolute;">
+        <div id="input_text_box" class="page-layer" draggable="true"
+              style="box-sizing: content-box; width: 49%;  margin-right: 8px;
+                     left: 0px; top: 0px;" dir="ltr">
+        <div id="input_text-clear-button"
+             style="-webkit-user-select: none; right: 0px; margin-right: 2px; position: absolute;"
+             class="page-clear-button page-toolbar-button page-tooltip"
+             aria-label="Clear text" data-tooltip="Clear text"
+             role="button">
+             <span class="page-button-img"></span></div>
+        <textarea id="input_text" name="text" wrap="soft" tabindex="0"
+                  dir="ltr" spellcheck="false" autocapitalize="off"
+                  placeholder="Type or paste text to summarize here."
+                  autocomplete="off" autocorrect="off"
+                  style="overflow-x: auto; box-sizing: border-box;"></textarea>
+        <script type="text/javascript">
+        $('#page-submit-button').click(function (){
+          //Send a message to the NaCl module.
+          OtsNaclModule.postMessage($("#input_text").val());
+          $("#output_text").val('');
+        });
+        
+        var clearButtons = $('.page-clear-button');
+        for (var i = 0; i < clearButtons.length; ++i) {
+          $(clearButtons[i]).click(
+            function() {
+              document.getElementById('input_text').value = "";
+              $(this).hide();
+              return false;
+          });
+        }
+        
+        function handleCloseButton(textareaId) {
+          var textLength = document.getElementById(textareaId).value.length;
+          if (textLength > 0) {
+            $("#" + textareaId + "-clear-button").show();
+          } else {
+            $("#" + textareaId + "-clear-button").hide();
+          }
+        }
+        
+        var textareaControls = $('textarea');
+        
+        for (var i = 0; i < textareaControls.length; ++i) {
+          $(textareaControls[i]).bind('keyup keypress input paste', function() { 
+            handleCloseButton(this.id);
+          });
+        }
+        
+        function handleDragOver(e) {
+          if (e.preventDefault) {
+            e.preventDefault(); // Necessary. Allows us to drop.
+          }
+          e.dataTransfer.dropEffect = 'move'; // See the section on the DataTransfer object.
+          return false;
+        }
+
+        function handleDragEnter(e) {
+          this.classList.add('over');
+        }
+
+        function handleDragLeave(e) {
+          this.classList.remove('over');
+        }
+        
+        function handleDrop(e) {
+          if (e.stopPropagation) {
+            e.stopPropagation(); // Stops some browsers from redirecting.
+          }
+          
+          var files = e.dataTransfer.files;
+          $('#' + $(this).attr('id') + ' textarea').val('');
+          
+          if (files != null && files.length) {
+            // Read the File objects in this FileList.
+            for (var i = 0, f; f = files[i]; i++) {
+              var file = e.dataTransfer.files[i],
+              reader = new FileReader();
+              reader.onload = function (event) {
+                var content = event.target.result;
+                var contentIndex = content.indexOf(',');
+                
+                if (contentIndex) {
+                  try {
+                    $("#input_text").val(function(index, value) {
+                      return value + decodeURIComponent(
+                        escape(window.atob(content.substr(contentIndex + 1))));
+                    });
+                  } catch (error) {
+                    //
+                  }
+                  handleCloseButton('input_text');
+                }
+              };
+              reader.readAsDataURL(file);
+            }
+          } else {
+            $('#' + $(this).attr('id') + ' textarea').val(
+              e.dataTransfer.getData('text/plain'));
+          }
+          
+          [].forEach.call(cols, function (col) {
+            col.classList.remove('over');
+          });
+          var str = $(this).attr('id');
+          handleCloseButton(str.substring(0, str.length - 4));
+          
+          return false;
+        }
+        
+        var cols = $('#input_text_box');
+        [].forEach.call(cols, function(col) {
+          col.addEventListener('dragenter', handleDragEnter, false);
+          col.addEventListener('dragover', handleDragOver, false);
+          col.addEventListener('dragleave', handleDragLeave, false);
+          col.addEventListener('drop', handleDrop, false);
+        });
+        </script>
+        </div>
+        
+        <div class="page-layer"
+              style="box-sizing: content-box; width: 49%; margin-right: 8px; margin-left: 10px;
+                     left: 50%; top: 0px;" dir="ltr">
+        <div id="output_text-clear-button"
+             style="-webkit-user-select: none; right: 0px; margin-right: 2px; position: absolute; display: none;"
+             class="page-clear-button page-toolbar-button page-tooltip"
+             aria-label="Clear text" data-tooltip="Clear text"
+             role="button">
+             <span class="page-button-img"></span></div>
+        <textarea id="output_text" name="text" wrap="soft" tabindex="0"
+                  dir="ltr" spellcheck="false" autocapitalize="off"
+                  placeholder="Summarized text." readonly="readonly"
+                  autocomplete="off" autocorrect="off"
+                  style="overflow-x: auto; box-sizing: border-box; width: 100%;"></textarea>
+        <script type="text/javascript">
+        $("#output_text-clear-button").click(
+          function(){
+            document.getElementById('output_text').value = "";
+            return false;
+        });
+        </script>
+        </div>
+      </div>
+    </div>
+  </section>
+  
+  <section id="settings" name="settings">
+  <h1>Settings</h1>
+    <div>
+        <div id="page-edit-bar" style="width: 100%; position: relative; overflow: hidden; font: normal 13px arial,sans-serif;">
+          <span id="page-appname">View your dictionary</span>
+          
+          <div id="page-edit-button" class="page-inline-block">
+            <input type="submit" id="page-edit" value="View" tabindex="0" class="button-chrome" style="margin: 0 0 0 18px;">
+          </div>
+          <!--<div id="page-save-button" class="page-inline-block">
+            <input type="submit" id="page-save" value="Save" tabindex="0" class="button-chrome" style="margin: 0 0 0 18px;">
+          </div>-->
+        </div>
+      </div>
+    </div>
+    
+    
+    <div style="position: relative;">
+      <div id="dictionary_text_box_parent"
+           style="position: absolute; top: 0; right: 0; bottom: 0; left: 0; opacity: .3; background: #fff;">
+        <div id="dictionary_text_box" class="page-layer"
+              style="box-sizing: content-box; width: 50%;  margin: 10px 0 8px; 0" dir="ltr">
+          <div id="dictionay_text-clear-button"
+               style="-webkit-user-select: none; right: 0px; margin-right: 2px; position: absolute;"
+               class="page-clear-button page-toolbar-button"
+               aria-label="Clear text" data-tooltip="Clear text"
+               role="button">
+               <span class="page-button-img"></span></div>
+          <textarea id="dictionary_text" name="text" wrap="soft" tabindex="0"
+                        dir="ltr" spellcheck="true" autocapitalize="off"
+                        placeholder="Dictionary content." readonly="Readonly"
+                        autocomplete="off" autocorrect="off"
+                        style="overflow-x: auto; box-sizing: border-box; width: 100%;"></textarea>
+        </div>
+      </div>
+    </div>
+    <script type="text/javascript">
+    
+    $("#page-edit-button").click(function(event) {
+      $('#dictionary_text_box_parent').css({'opacity': '1'});
+      $('#dictionary_text').removeAttr('readonly');
+      $('#dictionay_text-clear-button').removeClass('page-toolbar-button-hover-transparent');
+      $('#dictionay_text-clear-button').addClass('page-tooltip');
+    });
+    
+    $("#page-save-button").click(function(event) {
+      $('#dictionary_text_box_parent').css({'opacity': '.4'});
+      $('#dictionary_text').attr('readonly','readonly');
+      $('#dictionay_text-clear-button').addClass('page-toolbar-button-hover-transparent');
+      $('#dictionay_text-clear-button').removeClass('page-tooltip');
+    });
+    
+    </script>
+    
+  </section>
+  
+  <section id="about" name="about">
+  <h1>About</h1>
+    <div>
+      <p>Ots (Open Text Summarizer) was created to bring new features in
+      Chromium browsers with using Google Native Client (NaCl) technology and
+      libarries: libots, glib, libroxml.</p>
+    </div>
+  </section>
+</article>
+
+<footer>
+<div class="page-footer">
+    <div  style="margin-top: 0px; padding: 0 35px; border-top: 1px solid #EBEBEB;
+                 line-height: 2em; background-color: whiteSmoke; ">
+      <span class="page-footer-span">
+        <div>©2012 <a href="http://www.linkedin.com/in/leonpajk">Leon Pajk</a></div>
+        <div><a href="https://github.com/pleo/ots">Project homepage</a></div>
+        <div><a href="http://www.google.com/recaptcha/mailhide/d?k=01XVXwefXapqjgQ3Xa58fPxA==&c=nLT_sCN7b8NSvILnhRYbIaa8DXxLtzg0V0dmAVL3Img=">Contact</a></div>
+      </span>
+    </div>
+  </div>
+</footer>
+
+<div class="page-menu page-menu-vertical" id="page-lang-menu"
+     style="-webkit-user-select: none; box-sizing: border-box; line-height: normal;
+            left: 345px; top: 87px; visibility: visible; display: none;"
+     role="menu" aria-haspopup="true" aria-activedescendant="">
+  <table><tbody><tr>
+    <td>
+      <div class="page-menuitem-group" style="width: 100%; ">
+        <div class="page-menuitem page-option page-option-selected" role="option"
+             style="-webkit-user-select: none; " aria-selected="true" id=":0">
+          <div class="page-menuitem-content" style="-webkit-user-select: none; ">
+            <div class="page-menuitem-checkbox" style="-webkit-user-select: none; ">
+          </div>English</div>
+        </div>
+        <div class="page-menuseparator" role="separator" style="-webkit-user-select: none; "></div>
+        <div class="page-menuitem page-option" role="option" style="-webkit-user-select: none; " id=":1">
+          <div class="page-menuitem-content" style="-webkit-user-select: none; ">
+            <div class="page-menuitem-checkbox" style="-webkit-user-select: none; ">
+          </div>Basque</div>
+        </div>
+        <div class="page-menuitem page-option" role="option" style="-webkit-user-select: none; " id=":2">
+          <div class="page-menuitem-content" style="-webkit-user-select: none; ">
+            <div class="page-menuitem-checkbox" style="-webkit-user-select: none; ">
+          </div>Bulgarian</div>
+        </div>
+        <div class="page-menuitem page-option" role="option" style="-webkit-user-select: none; " id=":3">
+          <div class="page-menuitem-content" style="-webkit-user-select: none; ">
+            <div class="page-menuitem-checkbox" style="-webkit-user-select: none; ">
+            </div>Catalan</div>
+        </div>
+        <div class="page-menuitem page-option" role="option" style="-webkit-user-select: none; " id=":4">
+          <div class="page-menuitem-content" style="-webkit-user-select: none; ">
+            <div class="page-menuitem-checkbox" style="-webkit-user-select: none; ">
+          </div>Czech</div>
+        </div>
+        <div class="page-menuitem page-option" role="option" style="-webkit-user-select: none; " id=":5">
+          <div class="page-menuitem-content" style="-webkit-user-select: none; ">
+            <div class="page-menuitem-checkbox" style="-webkit-user-select: none; ">
+          </div>Danish</div>
+        </div>
+        <div class="page-menuitem page-option" role="option" style="-webkit-user-select: none; " id=":6">
+          <div class="page-menuitem-content" style="-webkit-user-select: none; ">
+            <div class="page-menuitem-checkbox" style="-webkit-user-select: none; ">
+          </div>Dutch</div>
+        </div>
+        <div class="page-menuitem page-option" role="option" style="-webkit-user-select: none; " id=":7">
+          <div class="page-menuitem-content" style="-webkit-user-select: none; ">
+            <div class="page-menuitem-checkbox" style="-webkit-user-select: none; ">
+          </div>German</div>
+        </div>
+      </div>
+    </td>
+    <td>
+      <div class="page-menuitem-group" style="width: 100%; ">
+        <div class="page-menuitem page-option" role="option" style="-webkit-user-select: none; " id=":8">
+          <div class="page-menuitem-content" style="-webkit-user-select: none; ">
+            <div class="page-menuitem-checkbox" style="-webkit-user-select: none; ">
+          </div>Greek</div>
+        </div>
+        <div class="page-menuitem page-option" role="option" style="-webkit-user-select: none; " id=":9">
+          <div class="page-menuitem-content" style="-webkit-user-select: none; ">
+            <div class="page-menuitem-checkbox" style="-webkit-user-select: none; ">
+          </div>Esperanto</div>
+        </div>
+        <div class="page-menuitem page-option" role="option" style="-webkit-user-select: none; " id=":a">
+          <div class="page-menuitem-content" style="-webkit-user-select: none; ">
+            <div class="page-menuitem-checkbox" style="-webkit-user-select: none; ">
+          </div>Estonian</div>
+        </div>
+        <div class="page-menuitem page-option" role="option" style="-webkit-user-select: none; " id=":b">
+          <div class="page-menuitem-content" style="-webkit-user-select: none; ">
+            <div class="page-menuitem-checkbox" style="-webkit-user-select: none; ">
+          </div>Finnish</div>
+        </div>
+        <div class="page-menuitem page-option" role="option" style="-webkit-user-select: none; " id=":c">
+          <div class="page-menuitem-content" style="-webkit-user-select: none; ">
+            <div class="page-menuitem-checkbox" style="-webkit-user-select: none; ">
+          </div>French</div>
+        </div>
+        <div class="page-menuitem page-option" role="option" style="-webkit-user-select: none; " id=":d">
+          <div class="page-menuitem-content" style="-webkit-user-select: none; ">
+            <div class="page-menuitem-checkbox" style="-webkit-user-select: none; ">
+          </div>Galician</div>
+        </div>
+        <div class="page-menuitem page-option" role="option" style="-webkit-user-select: none; " id=":e">
+          <div class="page-menuitem-content" style="-webkit-user-select: none; ">
+            <div class="page-menuitem-checkbox" style="-webkit-user-select: none; ">
+          </div>Hebrew</div>
+        </div>
+        <div class="page-menuitem page-option" role="option" style="-webkit-user-select: none; " id=":f">
+          <div class="page-menuitem-content" style="-webkit-user-select: none; ">
+            <div class="page-menuitem-checkbox" style="-webkit-user-select: none; ">
+          </div>Hungarian</div>
+        </div>
+      </div>
+    </td>
+    <td>
+      <div class="page-menuitem-group" style="width: 100%; ">
+        <div class="page-menuitem page-option" role="option" style="-webkit-user-select: none; " id=":g">
+          <div class="page-menuitem-content" style="-webkit-user-select: none; ">
+            <div class="page-menuitem-checkbox" style="-webkit-user-select: none; ">
+          </div>Icelandic</div>
+        </div>
+        <div class="page-menuitem page-option" role="option" style="-webkit-user-select: none; " id=":h">
+          <div class="page-menuitem-content" style="-webkit-user-select: none; ">
+            <div class="page-menuitem-checkbox" style="-webkit-user-select: none; ">
+          </div>Indonesian</div>
+        </div>
+        <div class="page-menuitem page-option" role="option" style="-webkit-user-select: none; " id=":j">
+          <div class="page-menuitem-content" style="-webkit-user-select: none; ">
+            <div class="page-menuitem-checkbox" style="-webkit-user-select: none; ">
+          </div>Interlingua</div>
+        </div>
+        <div class="page-menuitem page-option" role="option" style="-webkit-user-select: none; " id=":k">
+          <div class="page-menuitem-content" style="-webkit-user-select: none; ">
+            <div class="page-menuitem-checkbox" style="-webkit-user-select: none; ">
+          </div>Irish</div>
+        </div>
+        <div class="page-menuitem page-option" role="option" style="-webkit-user-select: none; " id=":l">
+          <div class="page-menuitem-content" style="-webkit-user-select: none; ">
+            <div class="page-menuitem-checkbox" style="-webkit-user-select: none; ">
+          </div>Italian</div>
+        </div>
+        <div class="page-menuitem page-option" role="option" style="-webkit-user-select: none; " id=":m">
+          <div class="page-menuitem-content" style="-webkit-user-select: none; ">
+            <div class="page-menuitem-checkbox" style="-webkit-user-select: none; ">
+          </div>Latvian</div>
+        </div>
+        <div class="page-menuitem page-option" role="option" style="-webkit-user-select: none; " id=":n">
+          <div class="page-menuitem-content" style="-webkit-user-select: none; ">
+            <div class="page-menuitem-checkbox" style="-webkit-user-select: none; ">
+          </div>Malay</div>
+        </div>
+        <div class="page-menuitem page-option" role="option" style="-webkit-user-select: none; " id=":o">
+          <div class="page-menuitem-content" style="-webkit-user-select: none; ">
+            <div class="page-menuitem-checkbox" style="-webkit-user-select: none; ">
+          </div>Norwegian</div>
+        </div>
+      </div>
+    </td>
+    <td>
+      <div class="page-menuitem-group" style="width: 100%; ">
+        <div class="page-menuitem page-option" role="option" style="-webkit-user-select: none; " id=":p">
+          <div class="page-menuitem-content" style="-webkit-user-select: none; ">
+            <div class="page-menuitem-checkbox" style="-webkit-user-select: none; ">
+          </div>Polish</div>
+        </div>
+        <div class="page-menuitem page-option" role="option" style="-webkit-user-select: none; " id=":q">
+          <div class="page-menuitem-content" style="-webkit-user-select: none; ">
+            <div class="page-menuitem-checkbox" style="-webkit-user-select: none; ">
+          </div>Portuguese</div>
+        </div>
+        <div class="page-menuitem page-option" role="option" style="-webkit-user-select: none; " id=":r">
+          <div class="page-menuitem-content" style="-webkit-user-select: none; ">
+            <div class="page-menuitem-checkbox" style="-webkit-user-select: none; ">
+          </div>Romanian</div>
+        </div>
+        <div class="page-menuitem page-option" role="option" style="-webkit-user-select: none; " id=":s">
+          <div class="page-menuitem-content" style="-webkit-user-select: none; ">
+            <div class="page-menuitem-checkbox" style="-webkit-user-select: none; ">
+          </div>Russian</div>
+        </div>
+        <div class="page-menuitem page-option" role="option" style="-webkit-user-select: none; " id=":t">
+          <div class="page-menuitem-content" style="-webkit-user-select: none; ">
+            <div class="page-menuitem-checkbox" style="-webkit-user-select: none; ">
+          </div>Spanish</div>
+        </div>
+        <div class="page-menuitem page-option" role="option" style="-webkit-user-select: none; " id=":u">
+          <div class="page-menuitem-content" style="-webkit-user-select: none; ">
+            <div class="page-menuitem-checkbox" style="-webkit-user-select: none; ">
+          </div>Swedish</div>
+        </div>
+        <div class="page-menuitem page-option" role="option" style="-webkit-user-select: none; " id=":v">
+          <div class="page-menuitem-content" style="-webkit-user-select: none; ">
+            <div class="page-menuitem-checkbox" style="-webkit-user-select: none; ">
+          </div>Tamil</div>
+        </div>
+        <div class="page-menuitem page-option" role="option" style="-webkit-user-select: none; " id=":w">
+          <div class="page-menuitem-content" style="-webkit-user-select: none; ">
+            <div class="page-menuitem-checkbox" style="-webkit-user-select: none; ">
+          </div>Turkish</div>
+        </div>
+      </div>
+    </td>
+    <td style="vertical-align: top;">
+      <div class="page-menuitem-group" style="width: 100%; vertical-align: top;">
+        <div class="page-menuitem page-option" role="option" style="-webkit-user-select: none; " id=":x">
+          <div class="page-menuitem-content" style="-webkit-user-select: none; ">
+            <div class="page-menuitem-checkbox" style="-webkit-user-select: none; ">
+          </div>Ukrainian</div>
+        </div>
+        <div class="page-menuitem page-option" role="option" style="-webkit-user-select: none; " id=":y">
+          <div class="page-menuitem-content" style="-webkit-user-select: none; ">
+            <div class="page-menuitem-checkbox" style="-webkit-user-select: none; ">
+          </div>Welsh</div>
+        </div>
+        <div class="page-menuitem page-option" role="option" style="-webkit-user-select: none; " id=":z">
+          <div class="page-menuitem-content" style="-webkit-user-select: none; ">
+            <div class="page-menuitem-checkbox" style="-webkit-user-select: none; ">
+          </div>Yiddish</div>
+        </div>
+      </div>
+    </td>
+  </tr></tbody></table>
+</div>
+
+<script type="text/javascript">
+    /* Click event handler for show and hide language menu. */
+    $("#page-sl-gms").click(function(event) {
+      var menu = $('#page-lang-menu');
+      if (menu !== null) {
+        if (menu.css('display') !== 'none') {
+          $('#page-lang-menu').hide();
+          $('#page-container').unbind('scroll');
+        }
+        else {
+          $("#page-sl-gms").removeClass('page-flat-menu-button-focused');
+          $('#page-lang-menu').show();
+          $("#page-lang-menu tr td [aria-selected='true']").addClass('page-menuitem-highlight');
+          $('#page-container').scroll(function(e){
+            var scrollY = document.body.children['page-container'].scrollTop;
+            $('#page-lang-menu').css({'margin-top': '-' + scrollY + 'px'});
+          });
+        }
+      }
+      event.stopPropagation();
+    });
+    
+    /* Add or remove hover on language menu button. */
+    $("#page-sl-gms").hover(
+      function(event) {
+        $(this).addClass('page-flat-menu-button-hover');
+        event.stopPropagation();
+      },
+      function(event) {
+        if ($('#page-lang-menu').css('display') === 'none') {
+          $(this).removeClass('page-flat-menu-button-hover');
+        }
+        event.stopPropagation();
+    });
+    
+    /* Focus for language menu button. */
+    $("#page-sl-gms").focus(function() {
+      $("#page-sl-gms").addClass('page-flat-menu-button-focused');
+    });
+    
+    /* Blur for language menu button. */
+    $("#page-sl-gms").blur(function() {
+      $("#page-sl-gms").removeClass('page-flat-menu-button-focused');
+    });
+    
+    /* Remove hover when mouse enter the language menu. */
+    $("#page-lang-menu").mouseenter(function() {
+      $("#page-lang-menu tr td [aria-selected='true']").removeClass('page-menuitem-highlight');
+    });
+    
+    /* Hover for items in language menu. */
+    $("#page-lang-menu tr td [role='option']").hover(
+      function(event) {
+        $(this).addClass('page-menuitem-highlight');
+        var activeDescendantId = $(this).attr('id');
+        if ('' !== activeDescendantId) {
+          $('#page-lang-menu').attr('aria-activedescendant', activeDescendantId);
+        }
+        event.stopPropagation();
+      },
+      function(event) {
+        $(this).removeClass('page-menuitem-highlight');
+        event.stopPropagation();
+    });
+    
+    /* Mouse up event handler for items in language menu. */
+    $("#page-lang-menu tr td [role='option']").click(
+      function(event) {
+        $("#page-sl-gms").removeClass('page-flat-menu-button-hover');
+        var selectedElement = $("#page-lang-menu tr td [aria-selected='true']");
+        if(selectedElement !== null) {
+          selectedElement.attr('aria-selected', 'false');
+          selectedElement.removeClass('page-option-selected');
+        }
+        $(this).attr('aria-selected','true');
+        $(this).addClass('page-option-selected');
+        $("#page-sl-gms div").first().text("From: " + $(this).text());
+        $("#page-lang-menu").hide();
+        $('#page-container').unbind('scroll');
+        event.stopPropagation();
+    });
+    
+    /* Stop bubbling (do not hide menu) when mouse click was not over item. */
+    $('#page-lang-menu').click(function(event) {
+      event.stopPropagation();
+    });
+    
+    /* Hide the menu when left mouse button was triggered */
+    $('html').click(function(event){
+      $("#page-lang-menu").hide();
+      $("#page-sl-gms").removeClass('page-flat-menu-button-hover');
+    });
+    
+    /* Do not hide menu when right mouse button was triggered over menu. */
+    $('#page-lang-menu').mousedown(function(event) {
+      if (event.which == 3) {
+        event.stopPropagation();
+      }
+    });
+    
+    /* Hide the menu when right mouse button was triggered. */
+    $('html').mousedown(function(event) {
+      if (event.which == 3) {
+        $("#page-lang-menu").hide();
+        $('#page-container').unbind('scroll');
+        $("#page-sl-gms").removeClass('page-flat-menu-button-hover');
+        event.stopPropagation();
+      }
+    });
+    </script>
+
+</body>
+</html>

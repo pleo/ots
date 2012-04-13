@@ -1,0 +1,14 @@
+OTS (Open Text Summarizer)
+Google Chrome/Chromium extension
+--------------------------------
+
+How to build for Google Native Client NaCl
+------------------------------------------
+0. Ensure that you build libroxml and glib libraries for nacl platform.
+1. Set 'NACL_SDK_ROOT' path in build.sh file
+2. Run 'bash build.sh -Q' to build project
+3. Run httpd.py (or copy build files to your http server www directory) in examples directory.
+4. Open ots_nacl.html in google chrome/chromium browser
+
+To clear build files run command 'bash build.sh -c'
+
